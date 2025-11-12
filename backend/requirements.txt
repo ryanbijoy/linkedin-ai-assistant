@@ -1,0 +1,12 @@
+fastapi==0.121.1
+uvicorn==0.38.0
+openai==2.7.2
+python-dotenv==1.2.1
+apify-client==2.2.1
+langchain==0.3.23
+langchain-openai==0.3.5
+langgraph==0.2.71
+pydantic==2.12.4
+requests==2.32.5
+
+
