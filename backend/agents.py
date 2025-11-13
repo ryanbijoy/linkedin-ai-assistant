@@ -4,7 +4,33 @@ from langgraph.checkpoint.memory import MemorySaver
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 import json
+import re
 from prompts import PROFILE_ANALYSIS_PROMPT, JOB_MATCH_PROMPT, CONTENT_GENERATION_PROMPT, CAREER_COUNSELOR_PROMPT
+
+
+def extract_json_from_response(text: str) -> Optional[dict]:
+    """Extract JSON from LLM response, handling markdown code blocks"""
+    # Try to find JSON in markdown code blocks
+    json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if json_match:
+        try:
+            return json.loads(json_match.group(1))
+        except json.JSONDecodeError:
+            pass
+    
+    # Try to find JSON object directly
+    json_match = re.search(r'\{.*\}', text, re.DOTALL)
+    if json_match:
+        try:
+            return json.loads(json_match.group(0))
+        except json.JSONDecodeError:
+            pass
+    
+    # Try parsing the entire response
+    try:
+        return json.loads(text.strip())
+    except json.JSONDecodeError:
+        return None
 
 
 class AgentState(TypedDict):
@@ -21,7 +47,7 @@ class AgentState(TypedDict):
 class LinkedInAgentSystem:
     def __init__(self, openai_api_key: str):
         self.llm = ChatOpenAI(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             api_key=openai_api_key,
             temperature=0.7
         )
@@ -97,9 +123,8 @@ class LinkedInAgentSystem:
         ]
         
         response = self.llm.invoke(messages)
-        try:
-            analysis_result = json.loads(response.content)
-        except json.JSONDecodeError:
+        analysis_result = extract_json_from_response(response.content)
+        if not analysis_result:
             analysis_result = {"analysis": response.content, "raw_analysis": True}
         
         state["analysis_result"] = analysis_result
@@ -116,9 +141,8 @@ class LinkedInAgentSystem:
         
         response = self.llm.invoke(messages)
         
-        try:
-            content_suggestions = json.loads(response.content)
-        except json.JSONDecodeError:
+        content_suggestions = extract_json_from_response(response.content)
+        if not content_suggestions:
             content_suggestions = {"suggestions": response.content, "raw_content": True}
         
         state["content_suggestions"] = content_suggestions
@@ -135,12 +159,16 @@ class LinkedInAgentSystem:
         
         response = self.llm.invoke(messages)
         
-        try:
-            job_match_result = json.loads(response.content)
-            state["job_match_score"] = job_match_result.get("match_score", 0)
-            state["skill_gaps"] = job_match_result.get("gaps", [])
-        except json.JSONDecodeError:
+        job_match_result = extract_json_from_response(response.content)
+        if not job_match_result:
             job_match_result = {"analysis": response.content, "raw_analysis": True}
+        else:
+            state["job_match_score"] = job_match_result.get("match_score", 0)
+            gaps = job_match_result.get("gaps", {})
+            if isinstance(gaps, dict):
+                state["skill_gaps"] = gaps.get("missing_skills", []) + gaps.get("missing_experience", [])
+            else:
+                state["skill_gaps"] = gaps if isinstance(gaps, list) else []
         
         state["analysis_result"] = job_match_result
         return state
@@ -157,9 +185,8 @@ class LinkedInAgentSystem:
         
         response = self.llm.invoke(messages)
         
-        try:
-            counseling_result = json.loads(response.content)
-        except json.JSONDecodeError:
+        counseling_result = extract_json_from_response(response.content)
+        if not counseling_result:
             counseling_result = {"guidance": response.content, "raw_guidance": True}
         
         state["analysis_result"] = counseling_result
