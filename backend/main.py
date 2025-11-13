@@ -14,7 +14,7 @@ app = FastAPI(title="LinkedIn AI Assistant API")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], 
+    allow_origins=["http://localhost:3000", "https://linkedin-assistant-psi.vercel.app/"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,6 +22,20 @@ app.add_middleware(
 
 agent_system = LinkedInAgentSystem(openai_api_key=OPENAI_API_KEY)
 profile_storage = {}
+
+@app.get("/")
+def root():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "message": "LinkedIn AI Assistant API is running",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy"}
 
 @app.post("/scrape-linkedin")
 def scrape_linkedin(profile_url: str = Body(..., embed=True)):
