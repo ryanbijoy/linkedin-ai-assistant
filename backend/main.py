@@ -20,8 +20,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-agent_system = LinkedInAgentSystem(openai_api_key=OPENAI_API_KEY)
+# Cache agent systems by API key to avoid recreating them
+agent_systems_cache = {}
 profile_storage = {}
+
+def get_agent_system(api_key: Optional[str] = None) -> LinkedInAgentSystem:
+    """Get or create an agent system for the given API key"""
+    # Use provided API key or fall back to environment variable
+    key = api_key or OPENAI_API_KEY
+    
+    if not key:
+        raise HTTPException(
+            status_code=400, 
+            detail="API key is required. Please provide an OpenAI API key."
+        )
+    
+    # Cache agent systems by API key
+    if key not in agent_systems_cache:
+        agent_systems_cache[key] = LinkedInAgentSystem(openai_api_key=key)
+    
+    return agent_systems_cache[key]
 
 @app.get("/")
 def root():
@@ -55,9 +73,11 @@ def scrape_linkedin(profile_url: str = Body(..., embed=True)):
 async def chat(
     message: str = Body(...),
     session_id: str = Body("default"),
-    target_role: Optional[str] = Body(None)
+    target_role: Optional[str] = Body(None),
+    api_key: Optional[str] = Body(None)
 ):
     try:
+        agent_system = get_agent_system(api_key)
         profile_data = profile_storage.get(session_id)
         
         response = agent_system.chat(
@@ -72,13 +92,20 @@ async def chat(
             "session_id": session_id
         }
     
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing chat: {str(e)}")
 
 
 @app.post("/analyze-profile")
-async def analyze_profile(profile_url: str = Body(..., embed=True)):
+async def analyze_profile(
+    profile_url: str = Body(..., embed=True),
+    api_key: Optional[str] = Body(None)
+):
     try:
+        agent_system = get_agent_system(api_key)
+        
         #Scrapes the Linkedin profile data
         profile_data = scrape_linkedin_profile(profile_url)
         
@@ -96,6 +123,8 @@ async def analyze_profile(profile_url: str = Body(..., embed=True)):
         
         return {"success": True, "session_id": session_id, "profile_data": profile, "analysis": response}
     
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error analyzing profile: {str(e)}")
 
@@ -103,10 +132,13 @@ async def analyze_profile(profile_url: str = Body(..., embed=True)):
 @app.post("/job-fit-analysis")
 async def job_fit_analysis(
     profile_url: str = Body(..., embed=True),
-    target_role: str = Body(..., embed=True)
+    target_role: str = Body(..., embed=True),
+    api_key: Optional[str] = Body(None)
 ):
     """Analyze job fit by comparing profile with industry standard job description"""
     try:
+        agent_system = get_agent_system(api_key)
+        
         # Scrape profile if not already stored
         profile_data = scrape_linkedin_profile(profile_url)
         
@@ -133,6 +165,8 @@ async def job_fit_analysis(
             "analysis": response
         }
     
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error analyzing job fit: {str(e)}")
 
@@ -140,10 +174,13 @@ async def job_fit_analysis(
 @app.post("/content-enhancement")
 async def content_enhancement(
     profile_url: str = Body(..., embed=True),
-    target_role: Optional[str] = Body(None, embed=True)
+    target_role: Optional[str] = Body(None, embed=True),
+    api_key: Optional[str] = Body(None)
 ):
     """Generate enhanced versions of profile sections"""
     try:
+        agent_system = get_agent_system(api_key)
+        
         # Check if profile is already stored
         session_id = hashlib.md5(profile_url.encode()).hexdigest()
         profile = profile_storage.get(session_id)
@@ -172,6 +209,8 @@ async def content_enhancement(
             "enhanced_content": response
         }
     
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating content: {str(e)}")
 
@@ -179,10 +218,13 @@ async def content_enhancement(
 @app.post("/career-guidance")
 async def career_guidance(
     profile_url: str = Body(..., embed=True),
-    target_role: Optional[str] = Body(None, embed=True)
+    target_role: Optional[str] = Body(None, embed=True),
+    api_key: Optional[str] = Body(None)
 ):
     """Provide career counseling and skill gap analysis"""
     try:
+        agent_system = get_agent_system(api_key)
+        
         # Check if profile is already stored
         session_id = hashlib.md5(profile_url.encode()).hexdigest()
         profile = profile_storage.get(session_id)
@@ -211,5 +253,7 @@ async def career_guidance(
             "guidance": response
         }
     
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error providing career guidance: {str(e)}")

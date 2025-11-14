@@ -39,6 +39,9 @@ interface ProfileData {
 }
 
 export default function Chatbot() {
+  const [apiKey, setApiKey] = useState<string>('');
+  const [apiKeyEntered, setApiKeyEntered] = useState<boolean>(false);
+  const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -70,6 +73,74 @@ export default function Chatbot() {
     }
   }, [profileData]);
 
+  const handleApiKeySubmit = () => {
+    if (apiKeyInput.trim()) {
+      setApiKey(apiKeyInput.trim());
+      setApiKeyEntered(true);
+    }
+  };
+
+  // Show API key input modal if not entered
+  if (!apiKeyEntered) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-100/50 p-8 max-w-md w-full mx-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-indigo-500/30">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+              LinkedIn AI Assistant
+            </h1>
+            <p className="text-gray-600">Please enter your OpenAI API key to get started</p>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                OpenAI API Key
+              </label>
+              <input
+                type="password"
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleApiKeySubmit();
+                  }
+                }}
+                placeholder="sk-..."
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-white text-gray-800 placeholder-gray-400"
+                autoFocus
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Your API key is stored locally and never sent to our servers. Get your key from{' '}
+                <a 
+                  href="https://platform.openai.com/api-keys" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 hover:text-indigo-800 underline"
+                >
+                  OpenAI Platform
+                </a>
+              </p>
+            </div>
+            
+            <button
+              onClick={handleApiKeySubmit}
+              disabled={!apiKeyInput.trim()}
+              className="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -96,7 +167,10 @@ export default function Chatbot() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ profile_url: userInput }),
+          body: JSON.stringify({ 
+            profile_url: userInput,
+            api_key: apiKey
+          }),
         });
 
         if (!response.ok) {
@@ -136,6 +210,7 @@ export default function Chatbot() {
           body: JSON.stringify({
             message: userInput,
             session_id: sessionId,
+            api_key: apiKey,
           }),
         });
 
@@ -207,6 +282,7 @@ export default function Chatbot() {
         body: JSON.stringify({
           profile_url: profileUrl,
           target_role: targetRole.trim(),
+          api_key: apiKey,
         }),
       });
 
@@ -251,6 +327,7 @@ export default function Chatbot() {
         body: JSON.stringify({
           profile_url: profileUrl,
           target_role: targetRole.trim() || undefined,
+          api_key: apiKey,
         }),
       });
 
@@ -295,6 +372,7 @@ export default function Chatbot() {
         body: JSON.stringify({
           profile_url: profileUrl,
           target_role: targetRole.trim() || undefined,
+          api_key: apiKey,
         }),
       });
 
