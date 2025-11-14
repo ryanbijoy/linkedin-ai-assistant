@@ -162,7 +162,7 @@ export default function Chatbot() {
 
       if (isLinkedInUrl && !profileLoaded) {
         // Call the analyze-profile endpoint (scrapes + analyzes)
-        const response = await fetch('http://localhost:8000/analyze-profile', {
+        const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/analyze-profile', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ export default function Chatbot() {
         
       } else if (profileLoaded) {
         // Use the chat endpoint for follow-up questions
-        const response = await fetch('http://localhost:8000/chat', {
+        const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -274,7 +274,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('http://localhost:8000/job-fit-analysis', {
+      const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/job-fit-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -319,7 +319,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('http://localhost:8000/content-enhancement', {
+      const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/content-enhancement', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -364,7 +364,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('http://localhost:8000/career-guidance', {
+      const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/career-guidance', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

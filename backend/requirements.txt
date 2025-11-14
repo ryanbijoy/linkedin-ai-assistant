@@ -1,6 +1,6 @@
 fastapi==0.121.1
 uvicorn==0.38.0
-openai==2.7.2
+openai
 python-dotenv==1.2.1
 apify-client==2.2.1
 langgraph==0.2.71
