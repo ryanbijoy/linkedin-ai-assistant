@@ -91,7 +91,7 @@ export default function Chatbot() {
 
       if (isLinkedInUrl && !profileLoaded) {
         // Call the analyze-profile endpoint (scrapes + analyzes)
-        const response = await fetch('https://7a5d2d778075.ngrok-free.app/analyze-profile', {
+        const response = await fetch('http://localhost:8000/analyze-profile', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ export default function Chatbot() {
         
       } else if (profileLoaded) {
         // Use the chat endpoint for follow-up questions
-        const response = await fetch('https://7a5d2d778075.ngrok-free.app/chat', {
+        const response = await fetch('http://localhost:8000/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('https://7a5d2d778075.ngrok-free.app/job-fit-analysis', {
+      const response = await fetch('http://localhost:8000/job-fit-analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -243,7 +243,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('https://7a5d2d778075.ngrok-free.app/content-enhancement', {
+      const response = await fetch('http://localhost:8000/content-enhancement', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -287,7 +287,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('https://7a5d2d778075.ngrok-free.app/career-guidance', {
+      const response = await fetch('http://localhost:8000/career-guidance', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
