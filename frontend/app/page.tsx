@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { API_ENDPOINTS } from './config';
 
 interface Message {
   id: string;
@@ -162,7 +163,7 @@ export default function Chatbot() {
 
       if (isLinkedInUrl && !profileLoaded) {
         // Call the analyze-profile endpoint (scrapes + analyzes)
-        const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/analyze-profile', {
+        const response = await fetch(API_ENDPOINTS.analyzeProfile, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -202,7 +203,7 @@ export default function Chatbot() {
         
       } else if (profileLoaded) {
         // Use the chat endpoint for follow-up questions
-        const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/chat', {
+        const response = await fetch(API_ENDPOINTS.chat, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -274,7 +275,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/job-fit-analysis', {
+      const response = await fetch(API_ENDPOINTS.jobFitAnalysis, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -319,7 +320,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/content-enhancement', {
+      const response = await fetch(API_ENDPOINTS.contentEnhancement, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -364,7 +365,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const response = await fetch('https://linkedin-ai-assistant-9wr9.onrender.com/career-guidance', {
+      const response = await fetch(API_ENDPOINTS.careerGuidance, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
