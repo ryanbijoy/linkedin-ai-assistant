@@ -47,7 +47,7 @@ class AgentState(TypedDict):
 class LinkedInAgentSystem:
     def __init__(self, openai_api_key: str):
         self.llm = ChatOpenAI(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             api_key=openai_api_key,
             temperature=0.7
         )
