@@ -56,9 +56,12 @@ def health_check():
     return {"status": "healthy"}
 
 @app.post("/scrape-linkedin")
-def scrape_linkedin(profile_url: str = Body(..., embed=True)):
+def scrape_linkedin(
+    profile_url: str = Body(..., embed=True),
+    apify_api_key: Optional[str] = Body(None)
+):
     try:
-        profile_data = scrape_linkedin_profile(profile_url)
+        profile_data = scrape_linkedin_profile(profile_url, apify_api_token=apify_api_key)
         
         if not profile_data or len(profile_data) == 0:
             raise HTTPException(status_code=404, detail="Could not scrape profile. Please check the URL and try again.")
@@ -101,13 +104,14 @@ async def chat(
 @app.post("/analyze-profile")
 async def analyze_profile(
     profile_url: str = Body(..., embed=True),
-    api_key: Optional[str] = Body(None)
+    api_key: Optional[str] = Body(None),
+    apify_api_key: Optional[str] = Body(None)
 ):
     try:
         agent_system = get_agent_system(api_key)
         
         #Scrapes the Linkedin profile data
-        profile_data = scrape_linkedin_profile(profile_url)
+        profile_data = scrape_linkedin_profile(profile_url, apify_api_token=apify_api_key)
         
         #If the profile data is not found, raise an error
         if not profile_data or len(profile_data) == 0:
@@ -133,14 +137,15 @@ async def analyze_profile(
 async def job_fit_analysis(
     profile_url: str = Body(..., embed=True),
     target_role: str = Body(..., embed=True),
-    api_key: Optional[str] = Body(None)
+    api_key: Optional[str] = Body(None),
+    apify_api_key: Optional[str] = Body(None)
 ):
     """Analyze job fit by comparing profile with industry standard job description"""
     try:
         agent_system = get_agent_system(api_key)
         
         # Scrape profile if not already stored
-        profile_data = scrape_linkedin_profile(profile_url)
+        profile_data = scrape_linkedin_profile(profile_url, apify_api_token=apify_api_key)
         
         if not profile_data or len(profile_data) == 0:
             raise HTTPException(status_code=404, detail="Could not scrape profile")
@@ -175,7 +180,8 @@ async def job_fit_analysis(
 async def content_enhancement(
     profile_url: str = Body(..., embed=True),
     target_role: Optional[str] = Body(None, embed=True),
-    api_key: Optional[str] = Body(None)
+    api_key: Optional[str] = Body(None),
+    apify_api_key: Optional[str] = Body(None)
 ):
     """Generate enhanced versions of profile sections"""
     try:
@@ -186,7 +192,7 @@ async def content_enhancement(
         profile = profile_storage.get(session_id)
         
         if not profile:
-            profile_data = scrape_linkedin_profile(profile_url)
+            profile_data = scrape_linkedin_profile(profile_url, apify_api_token=apify_api_key)
             if not profile_data or len(profile_data) == 0:
                 raise HTTPException(status_code=404, detail="Could not scrape profile")
             profile = profile_data[0] if isinstance(profile_data, list) else profile_data
@@ -219,7 +225,8 @@ async def content_enhancement(
 async def career_guidance(
     profile_url: str = Body(..., embed=True),
     target_role: Optional[str] = Body(None, embed=True),
-    api_key: Optional[str] = Body(None)
+    api_key: Optional[str] = Body(None),
+    apify_api_key: Optional[str] = Body(None)
 ):
     """Provide career counseling and skill gap analysis"""
     try:
@@ -230,7 +237,7 @@ async def career_guidance(
         profile = profile_storage.get(session_id)
         
         if not profile:
-            profile_data = scrape_linkedin_profile(profile_url)
+            profile_data = scrape_linkedin_profile(profile_url, apify_api_token=apify_api_key)
             if not profile_data or len(profile_data) == 0:
                 raise HTTPException(status_code=404, detail="Could not scrape profile")
             profile = profile_data[0] if isinstance(profile_data, list) else profile_data

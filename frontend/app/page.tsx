@@ -41,8 +41,10 @@ interface ProfileData {
 
 export default function Chatbot() {
   const [apiKey, setApiKey] = useState<string>('');
+  const [apifyApiKey, setApifyApiKey] = useState<string>('');
   const [apiKeyEntered, setApiKeyEntered] = useState<boolean>(false);
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
+  const [apifyApiKeyInput, setApifyApiKeyInput] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -75,8 +77,9 @@ export default function Chatbot() {
   }, [profileData]);
 
   const handleApiKeySubmit = () => {
-    if (apiKeyInput.trim()) {
+    if (apiKeyInput.trim() && apifyApiKeyInput.trim()) {
       setApiKey(apiKeyInput.trim());
+      setApifyApiKey(apifyApiKeyInput.trim());
       setApiKeyEntered(true);
     }
   };
@@ -95,7 +98,7 @@ export default function Chatbot() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
               LinkedIn AI Assistant
             </h1>
-            <p className="text-gray-600">Please enter your OpenAI API key to get started</p>
+            <p className="text-gray-600">Please enter your API keys to get started</p>
           </div>
           
           <div className="space-y-4">
@@ -116,22 +119,29 @@ export default function Chatbot() {
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-white text-gray-800 placeholder-gray-400"
                 autoFocus
               />
-              <p className="text-xs text-gray-500 mt-2">
-                Your API key is stored locally and never sent to our servers. Get your key from{' '}
-                <a 
-                  href="https://platform.openai.com/api-keys" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-indigo-600 hover:text-indigo-800 underline"
-                >
-                  OpenAI Platform
-                </a>
-              </p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Apify API Key
+              </label>
+              <input
+                type="password"
+                value={apifyApiKeyInput}
+                onChange={(e) => setApifyApiKeyInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleApiKeySubmit();
+                  }
+                }}
+                placeholder="apify_api_..."
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-white text-gray-800 placeholder-gray-400"
+              />
             </div>
             
             <button
               onClick={handleApiKeySubmit}
-              disabled={!apiKeyInput.trim()}
+              disabled={!apiKeyInput.trim() || !apifyApiKeyInput.trim()}
               className="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
             >
               Continue
@@ -170,7 +180,8 @@ export default function Chatbot() {
           },
           body: JSON.stringify({ 
             profile_url: userInput,
-            api_key: apiKey
+            api_key: apiKey,
+            apify_api_key: apifyApiKey
           }),
         });
 
@@ -284,6 +295,7 @@ export default function Chatbot() {
           profile_url: profileUrl,
           target_role: targetRole.trim(),
           api_key: apiKey,
+          apify_api_key: apifyApiKey,
         }),
       });
 
@@ -329,6 +341,7 @@ export default function Chatbot() {
           profile_url: profileUrl,
           target_role: targetRole.trim() || undefined,
           api_key: apiKey,
+          apify_api_key: apifyApiKey,
         }),
       });
 
@@ -374,6 +387,7 @@ export default function Chatbot() {
           profile_url: profileUrl,
           target_role: targetRole.trim() || undefined,
           api_key: apiKey,
+          apify_api_key: apifyApiKey,
         }),
       });
 
